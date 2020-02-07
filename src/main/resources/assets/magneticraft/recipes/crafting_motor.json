@@ -1,39 +1,35 @@
 {
   "type": "forge:ore_shaped",
   "pattern": [
-    "ABC",
-    "DEF",
-    "ABC"
+    "AA ",
+    "BCD",
+    "AA "
   ],
   "key": {
     "A": {
       "type": "forge:ore_dict",
-      "ore": "ingotLead"
+      "ore": "ingotLead",
+      "count": 1
     },
     "B": {
-      "type": "forge:ore_dict",
-      "ore": "lightPlateIron"
+      "item": "magneticraft:crafting",
+      "count": 1,
+      "data": 3
     },
     "C": {
       "type": "forge:ore_dict",
-      "ore": "nuggetCopper"
+      "ore": "dustRedstone",
+      "count": 1
     },
     "D": {
-      "item": "magneticraft:copper_coil",
-      "nbt": "{}"
-    },
-    "E": {
       "type": "forge:ore_dict",
-      "ore": "dustRedstone"
-    },
-    "F": {
-      "type": "forge:ore_dict",
-      "ore": "ingotIron"
+      "ore": "ingotIron",
+      "count": 1
     }
   },
   "result": {
     "item": "magneticraft:crafting",
-    "data": 2,
-    "count": 2
+    "count": 4,
+    "data": 2
   }
 }

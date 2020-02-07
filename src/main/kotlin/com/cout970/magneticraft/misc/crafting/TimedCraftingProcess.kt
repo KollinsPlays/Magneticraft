@@ -1,7 +1,7 @@
 package com.cout970.magneticraft.misc.crafting
 
-import com.cout970.magneticraft.util.add
-import com.cout970.magneticraft.util.newNbt
+import com.cout970.magneticraft.misc.add
+import com.cout970.magneticraft.misc.newNbt
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.world.World
 import net.minecraftforge.common.util.INBTSerializable
@@ -10,8 +10,8 @@ import net.minecraftforge.common.util.INBTSerializable
  * Created by cout970 on 22/08/2016.
  */
 class TimedCraftingProcess(
-        var process: ICraftingProcess,
-        var onWorkingTick: (Float) -> Unit
+    var process: ICraftingProcess,
+    var onWorkingTick: (Float) -> Unit
 ) : INBTSerializable<NBTTagCompound> {
 
     var timer = 0f

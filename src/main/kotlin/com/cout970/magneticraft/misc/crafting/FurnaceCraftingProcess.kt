@@ -1,7 +1,8 @@
 package com.cout970.magneticraft.misc.crafting
 
 import com.cout970.magneticraft.api.internal.ApiUtils
-import com.cout970.magneticraft.tileentity.modules.ModuleInventory
+import com.cout970.magneticraft.misc.fromCelsiusToKelvin
+import com.cout970.magneticraft.systems.tilemodules.ModuleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.FurnaceRecipes
 
@@ -9,10 +10,10 @@ import net.minecraft.item.crafting.FurnaceRecipes
  * Created by cout970 on 2017/07/01.
  */
 class FurnaceCraftingProcess(
-        val invModule: ModuleInventory,
-        val inputSlot: Int,
-        val outputSlot: Int
-) : ICraftingProcess {
+    val invModule: ModuleInventory,
+    val inputSlot: Int,
+    val outputSlot: Int
+) : ICraftingProcess, IHeatCraftingProcess {
 
     private var cacheKey: ItemStack = ItemStack.EMPTY
     private var cacheValue: ItemStack = ItemStack.EMPTY
@@ -49,4 +50,6 @@ class FurnaceCraftingProcess(
     }
 
     override fun duration(): Float = 100f
+
+    override fun minTemperature(): Float = 60.fromCelsiusToKelvin().toFloat()
 }

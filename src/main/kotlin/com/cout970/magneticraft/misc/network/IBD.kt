@@ -15,32 +15,44 @@ class IBD {
 
     private val map = mutableMapOf<Int, Any>()
 
-    fun setInteger(id: Int, value: Int) {
+    fun setInteger(id: Int, value: Int): IBD {
         map[id] = value
+        return this
     }
 
-    fun setLong(id: Int, value: Long) {
+    fun setLong(id: Int, value: Long): IBD {
         map[id] = value
+        return this
     }
 
-    fun setFloat(id: Int, value: Float) {
+    fun setFloat(id: Int, value: Float): IBD {
         map[id] = value
+        return this
     }
 
-    fun setDouble(id: Int, value: Double) {
+    fun setDouble(id: Int, value: Double): IBD {
         map[id] = value
+        return this
     }
 
-    fun setBoolean(id: Int, value: Boolean) {
+    fun setBoolean(id: Int, value: Boolean): IBD {
         map[id] = value
+        return this
     }
 
-    fun setString(id: Int, value: String) {
+    fun setString(id: Int, value: String): IBD {
         map[id] = value
+        return this
     }
 
-    fun setByteArray(id: Int, value: ByteArray) {
+    fun setByteArray(id: Int, value: ByteArray): IBD {
         map[id] = value
+        return this
+    }
+
+    fun setIntArray(id: Int, value: IntArray): IBD {
+        map[id] = value
+        return this
     }
 
     fun getInteger(id: Int) = map[id] as Int
@@ -56,6 +68,8 @@ class IBD {
     fun getString(id: Int) = map[id] as String
 
     fun getByteArray(id: Int) = map[id] as ByteArray
+
+    fun getIntArray(id: Int) = map[id] as IntArray
 
     fun getInteger(id: Int, action: (Int) -> Unit) {
         if (hasKey(id)) {
@@ -120,6 +134,15 @@ class IBD {
         }
     }
 
+    fun getIntArray(id: Int, action: (IntArray) -> Unit) {
+        if (hasKey(id)) {
+            val value = map[id]
+            if (value is IntArray) {
+                action.invoke(value)
+            }
+        }
+    }
+
     fun hasKey(id: Int) = map.containsKey(id)
 
     fun remove(id: Int) {
@@ -143,27 +166,14 @@ class IBD {
             val type = buf.readByte()
             val id = buf.readInt()
             when (type.toInt()) {
-                1 -> {
-                    setInteger(id, buf.readInt())
-                }
-                2 -> {
-                    setLong(id, buf.readLong())
-                }
-                3 -> {
-                    setFloat(id, buf.readFloat())
-                }
-                4 -> {
-                    setDouble(id, buf.readDouble())
-                }
-                5 -> {
-                    setBoolean(id, buf.readBoolean())
-                }
-                6 -> {
-                    setString(id, buf.readString())
-                }
-                7 -> {
-                    setByteArray(id, buf.readByteArray())
-                }
+                1 -> setInteger(id, buf.readInt())
+                2 -> setLong(id, buf.readLong())
+                3 -> setFloat(id, buf.readFloat())
+                4 -> setDouble(id, buf.readDouble())
+                5 -> setBoolean(id, buf.readBoolean())
+                6 -> setString(id, buf.readString())
+                7 -> setByteArray(id, buf.readByteArray())
+                8 -> setIntArray(id, buf.readIntArray())
             }
         }
     }
@@ -179,32 +189,20 @@ class IBD {
                 is Boolean -> 5
                 is String -> 6
                 is ByteArray -> 7
+                is IntArray -> 8
                 else -> throw IllegalStateException("Invalid value type: ${value.javaClass}, value:$value")
             }
             buf.writeByte(type)
             buf.writeInt(id)
             when (type) {
-                1 -> {
-                    buf.writeInt(value as Int)
-                }
-                2 -> {
-                    buf.writeLong(value as Long)
-                }
-                3 -> {
-                    buf.writeFloat(value as Float)
-                }
-                4 -> {
-                    buf.writeDouble(value as Double)
-                }
-                5 -> {
-                    buf.writeBoolean(value as Boolean)
-                }
-                6 -> {
-                    buf.writeString(value as String)
-                }
-                7 -> {
-                    buf.writeByteArray(value as ByteArray)
-                }
+                1 -> buf.writeInt(value as Int)
+                2 -> buf.writeLong(value as Long)
+                3 -> buf.writeFloat(value as Float)
+                4 -> buf.writeDouble(value as Double)
+                5 -> buf.writeBoolean(value as Boolean)
+                6 -> buf.writeString(value as String)
+                7 -> buf.writeByteArray(value as ByteArray)
+                8 -> buf.writeIntArray(value as IntArray)
                 else -> throw IllegalStateException("Invalid value type: ${value.javaClass}, value:$value")
             }
         }

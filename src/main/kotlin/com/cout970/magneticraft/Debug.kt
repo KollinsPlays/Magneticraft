@@ -1,12 +1,12 @@
 package com.cout970.magneticraft
 
 import com.cout970.magneticraft.misc.inventory.isNotEmpty
+import com.cout970.magneticraft.misc.logError
+import com.cout970.magneticraft.misc.toTextComponent
+import com.cout970.magneticraft.proxy.ClientProxy
 import com.cout970.magneticraft.registry.blocks
 import com.cout970.magneticraft.registry.items
-import com.cout970.magneticraft.tilerenderer.core.ModelCache
-import com.cout970.magneticraft.util.*
-import com.cout970.modelloader.ModelSerializer
-import com.cout970.modelloader.api.ModelUtilties
+import com.cout970.magneticraft.systems.items.ItemBase
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -18,16 +18,19 @@ import net.minecraft.inventory.InventoryCrafting
 import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.CraftingManager
+import net.minecraft.item.crafting.IRecipe
 import net.minecraft.launchwrapper.Launch
 import net.minecraft.server.MinecraftServer
 import net.minecraft.util.EnumHand
-import net.minecraft.util.ResourceLocation
 import net.minecraft.util.Timer
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraft.world.gen.ChunkProviderServer
+import net.minecraftforge.fluids.FluidUtil
+import net.minecraftforge.fml.client.FMLClientHandler
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import net.minecraftforge.oredict.OreDictionary
+import net.minecraftforge.oredict.OreIngredient
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 import java.io.File
@@ -61,58 +64,73 @@ object Debug {
         return temp
     }
 
-    var cache = emptyList<ModelCache>()
-    var last = -1L
+//    var cache = emptyList<IRenderCache>()
+//    var last = -1L
 
-    fun getOrLoad(loc: ResourceLocation = resource("models/block/mcx/test.mcx")): List<ModelCache> {
-        val locLasModified = lastModified(loc)
-        if (last != locLasModified) {
-            try {
-                cache = loadModel(loc)
-                last = locLasModified
-            } catch (e: Exception) {
-            }
-        }
-        return cache
-    }
-
-    fun lastModified(loc: ResourceLocation): Long {
-        val path = "assets/${loc.resourceDomain}/${loc.resourcePath}"
-
-        val url = Thread.currentThread().contextClassLoader.getResource(path)
-        return File(url.file).lastModified()
-    }
-
-    fun loadModel(loc: ResourceLocation): List<ModelCache> {
-        val resourceManager = Minecraft.getMinecraft().resourceManager
-        val res = resourceManager.getResource(loc)
-//        Thread.sleep(100)
-        val data = ModelSerializer.load(res.inputStream)
-        println("loading")
-
-        val textureGrouped = data.parts.groupBy { it.texture }
-        return textureGrouped.map {
-            ModelCache {
-                ModelUtilties.renderModelParts(data, it.value)
-            }.apply { texture = it.key.addPrefix("textures/").addPostfix(".png") }
-        }
-    }
+//    fun getOrLoad(loc: ResourceLocation = resource("models/block/mcx/test.mcx")): List<ModelCache> {
+//        val locLasModified = lastModified(loc)
+//        if (last != locLasModified) {
+//            try {
+//                cache = loadModel(loc)
+//                last = locLasModified
+//            } catch (e: Exception) {
+//            }
+//        }
+//        return cache
+//    }
+//
+//    fun lastModified(loc: ResourceLocation): Long {
+//        val path = "assets/${loc.resourceDomain}/${loc.resourcePath}"
+//
+//        val url = Thread.currentThread().contextClassLoader.getResource(path)
+//        return File(url.file).lastModified()
+//    }
+//
+//    fun loadModel(loc: ResourceLocation): List<ModelCache> {
+//        val resourceManager = Minecraft.getMinecraft().resourceManager
+//        val res = resourceManager.getResource(loc)
+////        Thread.sleep(100)
+//        val data = ModelSerializer.load(res.inputStream)
+//        println("loading")
+//
+//        val textureGrouped = data.parts.groupBy { it.texture }
+//        return textureGrouped.map {
+//            ModelCache {
+//                ModelUtilties.renderModelParts(data, it.value)
+//            }.apply { texture = it.key.addPrefix("textures/").addPostfix(".png") }
+//        }
+//    }
 
     fun printBlockWithoutRecipe() {
 
         val allBlocks = blocks.map { it.first }.toMutableSet()
-        val allItems = items.map { it }.toMutableSet()
+        val allItems = items.flatMap { item -> (item as ItemBase).variants.map { item to it.key } }.toMutableSet()
 
-        CraftingManager.REGISTRY.forEach {
+        CraftingManager.REGISTRY.filterIsInstance<IRecipe>().forEach { it ->
             val stack = it.recipeOutput
             if (stack.isEmpty) return@forEach
 
             val item = stack.item
+            val pair = item to stack.itemDamage
 
-            allItems.remove(item)
+            // check that the recipe doesn't use ore dictionary entries that are empty
+
+            val valid = it.ingredients.all { ing ->
+                (ing as? OreIngredient)?.matchingStacks?.isNotEmpty() ?: true
+            }
+
+            if (valid) {
+                allItems.remove(pair)
+            } else if (pair in allItems) {
+                println("Invalid recipe for: ${item.registryName}")
+            }
 
             if (item is ItemBlock) {
-                allBlocks.remove(item.block)
+                if (valid) {
+                    allBlocks.remove(item.block)
+                } else if (item.block in allBlocks) {
+                    println("Invalid recipe for: ${item.registryName}")
+                }
             }
         }
 
@@ -139,13 +157,13 @@ object Debug {
 
         try {
             val chars = listOf(
-                    "A", "B", "C",
-                    "D", "E", "F",
-                    "G", "H", "I"
+                "A", "B", "C",
+                "D", "E", "F",
+                "G", "H", "I"
             )
 
             val map = mutableMapOf<JsonObject, String>()
-            val slots = Array(9, { " " })
+            val slots = Array(9) { " " }
 
             for (y in 0 until inv.height) {
                 for (x in 0 until inv.width) {
@@ -209,7 +227,7 @@ object Debug {
             if (Keyboard.isKeyDown(Keyboard.KEY_C)) {
                 val folder = File(srcDir, "src/main/resources/assets/magneticraft/recipes")
                 val fileName = handItem.unlocalizedName.replace(".name", "").replaceBeforeLast(".", "").substring(1)
-                val file = File(folder, "${fileName}.json")
+                val file = File(folder, "$fileName.json")
 
                 file.writeText(jsonStr)
                 println("saved: ${file.exists()}, path: ${file.absolutePath}")
@@ -269,14 +287,40 @@ object Debug {
                     "ticks" -> setTicksPerSecond(args.getOrNull(1)?.toIntOrNull() ?: 20)
                     "info" -> {
                         val stack = (sender as EntityPlayer).inventory.getCurrentItem()
-                        sender.sendMessage("Item: $stack".toTextComponent())
+                        val fluid = FluidUtil.getFluidContained(stack)
+
+                        sender.sendMessage("Item: $stack <${stack.item.registryName}:${stack.itemDamage}>".toTextComponent())
                         sender.sendMessage("NBT: ${stack.tagCompound}".toTextComponent())
                         sender.sendMessage("OreDict: ${OreDictionary.getOreIDs(stack).map { OreDictionary.getOreName(it) }}".toTextComponent())
+                        if (fluid != null) {
+                            sender.sendMessage("FluidStack: ${fluid.fluid.name}, ${fluid.amount}, ${fluid.tag}".toTextComponent())
+                        }
                     }
                     "reload" -> {
                         Minecraft.getMinecraft().addScheduledTask {
-                            Mouse.setGrabbed(false)
-                            Minecraft.getMinecraft().refreshResources()
+                            ug()
+                            try {
+                                @Suppress("DEPRECATION")
+                                Minecraft.getMinecraft().refreshResources()
+                                val list = Minecraft.getMinecraft().saveLoader.saveList
+                                list.sort()
+                                FMLClientHandler.instance().tryLoadExistingWorld(null, list[0])
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                    "r" -> {
+                        val client = Magneticraft.proxy as? ClientProxy ?: return
+                        Minecraft.getMinecraft().addScheduledTask {
+                            ug()
+                            client.tileRenderers.forEach {
+                                try {
+                                    it.onModelRegistryReload()
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
                         }
                     }
                     else -> {
@@ -317,4 +361,11 @@ object Debug {
 
         override fun getUsage(sender: ICommandSender?): String = "Magneticraft debug command, is you see this please report to the mod author"
     }
+}
+
+val ug get() = Mouse.setGrabbed(false)
+
+fun ug(): Boolean {
+    Mouse.setGrabbed(false)
+    return true
 }

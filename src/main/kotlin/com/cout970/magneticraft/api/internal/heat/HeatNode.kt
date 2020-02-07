@@ -3,18 +3,18 @@ package com.cout970.magneticraft.api.internal.heat
 import com.cout970.magneticraft.api.core.ITileRef
 import com.cout970.magneticraft.api.core.NodeID
 import com.cout970.magneticraft.api.heat.IHeatNode
-import com.cout970.magneticraft.util.STANDARD_AMBIENT_TEMPERATURE
-import com.cout970.magneticraft.util.newNbt
+import com.cout970.magneticraft.misc.STANDARD_AMBIENT_TEMPERATURE
+import com.cout970.magneticraft.misc.newNbt
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import kotlin.math.max
 
 class HeatNode(
-        val ref: ITileRef,
-        private val mass: Double = 1.0,
-        private val conductivity: Double = 73.0,
-        private val name: String = "heat_node_1"
+    val ref: ITileRef,
+    private val mass: Double = 1.0,
+    private val conductivity: Double = 73.0,
+    private val name: String = "heat_node_1"
 ) : IHeatNode {
 
     private var internalEnergy = 0.0

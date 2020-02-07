@@ -4,17 +4,17 @@ import com.cout970.magneticraft.api.MagneticraftApi
 import com.cout970.magneticraft.api.internal.ApiUtils
 import com.cout970.magneticraft.api.registries.machines.grinder.IGrinderRecipe
 import com.cout970.magneticraft.misc.inventory.isNotEmpty
-import com.cout970.magneticraft.tileentity.modules.ModuleInventory
+import com.cout970.magneticraft.systems.tilemodules.ModuleInventory
 import net.minecraft.item.ItemStack
 
 /**
  * Created by cout970 on 2017/07/01.
  */
 class GrinderCraftingProcess(
-        val invModule: ModuleInventory,
-        val inputSlot: Int,
-        val outputSlot0: Int,
-        val outputSlot1: Int
+    val invModule: ModuleInventory,
+    val inputSlot: Int,
+    val outputSlot0: Int,
+    val outputSlot1: Int
 ) : ICraftingProcess {
 
     private var cacheKey: ItemStack = ItemStack.EMPTY

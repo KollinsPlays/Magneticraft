@@ -30,14 +30,28 @@
         "2.2.2": "Fixed copper coil not working, updated lip interpreter",
         "2.3.0": "Fixed world gen bugs, added hydraulic press",
         "2.3.1": "Finished hydraulic press gui, changed computer model",
-        "2.4.0": "Added heat system and oil processing"
+        "2.4.0": "Added heat system and oil processing",
+        "2.4.1": "Hotfix: fix documentation, crafttweaker and cable issues",
+        "2.4.2": "Hotfix: fix world corruption",
+        "2.4.3": "Hotfix: fix connectors and hydraulic press energy issues",
+        "2.4.4": "Adds some animations, allow connectors on cables",
+        "2.5.0": "Fix inserters and conveyor belts",
+        "2.5.1": "Fix sluice box crashes in servers",
+        "2.5.2": "Fix crashes in servers",
+        "2.6.0": "The secret update",
+        "2.6.1": "Hotfix 1",
+        "2.6.2": "Add RF transformer",
+        "2.6.3": "Fix server startup",
+        "2.6.4": "Lot of small fixes",
+        "2.7.0": "Steam turbine and steam boiler",
+        "2.8.2": "Small fixes and tiny new features"
     },
     "promos": {
         "1.12-latest": "2.1.2",
         "1.12-recommended": "2.1.2",
         "1.12.1-latest": "2.1.2",
         "1.12.1-recommended": "2.1.2",
-        "1.12.2-latest": "2.4.0",
-        "1.12.2-recommended": "2.4.0"
+        "1.12.2-latest": "2.8.2",
+        "1.12.2-recommended": "2.8.2"
     }
 }

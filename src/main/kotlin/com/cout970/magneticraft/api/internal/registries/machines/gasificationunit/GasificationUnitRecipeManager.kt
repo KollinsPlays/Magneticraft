@@ -18,9 +18,9 @@ object GasificationUnitRecipeManager : IGasificationUnitRecipeManager {
     override fun getRecipes(): MutableList<IGasificationUnitRecipe> = recipes.toMutableList()
 
     override fun registerRecipe(recipe: IGasificationUnitRecipe): Boolean {
-        if (findRecipe(recipe.input) != null) {
-            return false
-        }
+        if (findRecipe(recipe.input) != null) return false
+        if (recipe.itemOutput.isEmpty && recipe.fluidOutput == null) return false
+
         recipes += recipe
         return true
     }
@@ -29,6 +29,7 @@ object GasificationUnitRecipeManager : IGasificationUnitRecipeManager {
 
     override fun createRecipe(input: ItemStack, itemOutput: ItemStack, fluidOutput: FluidStack?,
                               duration: Float, minTemperature: Float, oreDict: Boolean): IGasificationUnitRecipe {
+        require(input.isNotEmpty) { "The recipe input must not be empty" }
         require(itemOutput.isNotEmpty || fluidOutput != null) { "The recipe must have at least one output" }
         return GasificationUnitRecipe(input, itemOutput, fluidOutput, duration, minTemperature, oreDict)
     }

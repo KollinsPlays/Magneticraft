@@ -1,6 +1,8 @@
 package com.cout970.magneticraft.registry
 
 import com.cout970.magneticraft.api.computer.IFloppyDisk
+import com.cout970.magneticraft.api.conveyorbelt.IConveyorBelt
+import com.cout970.magneticraft.api.conveyorbelt.Route
 import com.cout970.magneticraft.api.core.INode
 import com.cout970.magneticraft.api.core.INodeHandler
 import com.cout970.magneticraft.api.core.ITileRef
@@ -12,10 +14,15 @@ import com.cout970.magneticraft.api.energy.IManualConnectionHandler
 import com.cout970.magneticraft.api.heat.IHeatConnection
 import com.cout970.magneticraft.api.heat.IHeatNode
 import com.cout970.magneticraft.api.heat.IHeatNodeHandler
+import com.cout970.magneticraft.api.pneumatic.ITubeConnectable
+import com.cout970.magneticraft.api.pneumatic.PneumaticBox
+import com.cout970.magneticraft.api.pneumatic.PneumaticMode
 import com.cout970.magneticraft.api.tool.IGear
-import com.cout970.magneticraft.computer.FloppyDisk
-import com.cout970.magneticraft.item.ComputerItems
+import com.cout970.magneticraft.features.items.ComputerItems
+import com.cout970.magneticraft.systems.computer.FloppyDisk
+import com.cout970.magneticraft.systems.tilemodules.conveyorbelt.BoxedItem
 import net.minecraft.block.Block
+import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTBase
@@ -67,27 +74,44 @@ var ITEM_FLOPPY_DISK: Capability<IFloppyDisk>? = null
 @CapabilityInject(IGear::class)
 var ITEM_GEAR: Capability<IGear>? = null
 
+@CapabilityInject(ITubeConnectable::class)
+var TUBE_CONNECTABLE: Capability<ITubeConnectable>? = null
+
+@CapabilityInject(IConveyorBelt::class)
+var CONVEYOR_BELT: Capability<IConveyorBelt>? = null
+
 /**
  * This is called on the server and the client at preInit
  */
 fun registerCapabilities() {
-    CapabilityManager.INSTANCE.register(IElectricNodeHandler::class.java, EmptyStorage(), { DefaultElectricNodeProvider() })
-    CapabilityManager.INSTANCE.register(IHeatNodeHandler::class.java, EmptyStorage(), { DefaultHeatNodeProvider() })
-    CapabilityManager.INSTANCE.register(IManualConnectionHandler::class.java, EmptyStorage(), { DefaultManualConnectionHandler() })
-    CapabilityManager.INSTANCE.register(IGear::class.java, EmptyStorage(), { DefaultGear() })
-    CapabilityManager.INSTANCE.register(IFloppyDisk::class.java, EmptyStorage(), {
-        FloppyDisk(
+    CapabilityManager.INSTANCE.apply {
+        register(IElectricNodeHandler::class.java, EmptyStorage()) { DefaultElectricNodeProvider() }
+        register(IHeatNodeHandler::class.java, EmptyStorage()) { DefaultHeatNodeProvider() }
+        register(IManualConnectionHandler::class.java, EmptyStorage()) { DefaultManualConnectionHandler() }
+        register(IGear::class.java, EmptyStorage()) { DefaultGear() }
+        register(ITubeConnectable::class.java, EmptyStorage()) { DefaultTubeConnectable() }
+        register(IConveyorBelt::class.java, EmptyStorage()) { DefaultConveyorBelt() }
+        register(IFloppyDisk::class.java, EmptyStorage()) {
+            FloppyDisk(
                 ItemStack(ComputerItems.floppyDisk, 1, 0,
-                        ComputerItems.createNBT(128, true, true)
+                    ComputerItems.createNBT(128, read = true, write = true)
                 )
-        )
-    })
+            )
+        }
+    }
 }
 
 /**
  * Extension functions to get capabilities from TileEntities, Blocks and Items
  */
 fun <T> Capability<T>.fromTile(tile: TileEntity, side: EnumFacing? = null): T? {
+    if (tile.hasCapability(this, side)) {
+        return tile.getCapability(this, side)
+    }
+    return null
+}
+
+fun <T> Capability<T>.fromEntity(tile: Entity, side: EnumFacing? = null): T? {
     if (tile.hasCapability(this, side)) {
         return tile.getCapability(this, side)
     }
@@ -176,7 +200,7 @@ class DefaultManualConnectionHandler : IManualConnectionHandler {
                             stack: ItemStack): BlockPos? = thisBlock
 
     override fun connectWire(otherBlock: BlockPos, thisBlock: BlockPos, world: World, player: EntityPlayer,
-                             side: EnumFacing, stack: ItemStack): Boolean = false
+                             side: EnumFacing, stack: ItemStack) = IManualConnectionHandler.Result.ERROR
 }
 
 class DefaultGear : IGear {
@@ -185,4 +209,20 @@ class DefaultGear : IGear {
     override fun getMaxDurability(): Int = 0
     override fun getDurability(): Int = 0
     override fun applyDamage(stack: ItemStack): ItemStack = ItemStack.EMPTY
+}
+
+class DefaultTubeConnectable : ITubeConnectable {
+
+    override fun insert(box: PneumaticBox, mode: PneumaticMode): Boolean = false
+    override fun canInsert(box: PneumaticBox, mode: PneumaticMode): Boolean = false
+    override fun getWeight(): Int = 0
+}
+
+class DefaultConveyorBelt : IConveyorBelt {
+
+    override fun getFacing(): EnumFacing = EnumFacing.NORTH
+    override fun getBoxes(): MutableList<BoxedItem> = mutableListOf()
+    override fun getLevel(): Int = 0
+    override fun addItem(stack: ItemStack, simulated: Boolean): Boolean = false
+    override fun addItem(stack: ItemStack, side: EnumFacing, oldRoute: Route): Boolean = false
 }

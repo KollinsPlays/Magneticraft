@@ -1,13 +1,13 @@
 {
   "type": "forge:ore_shaped",
   "pattern": [
-    "AAA",
+    " A ",
     "BCB"
   ],
   "key": {
     "A": {
       "type": "forge:ore_dict",
-      "ore": "lightPlateIron"
+      "ore": "ingotIron"
     },
     "B": {
       "type": "forge:ore_dict",

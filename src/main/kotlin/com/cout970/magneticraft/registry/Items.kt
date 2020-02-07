@@ -1,6 +1,6 @@
 package com.cout970.magneticraft.registry
 
-import com.cout970.magneticraft.item.*
+import com.cout970.magneticraft.features.items.*
 import net.minecraft.item.Item
 import net.minecraftforge.registries.IForgeRegistry
 
@@ -22,6 +22,6 @@ fun initItems(registry: IForgeRegistry<Item>) {
     itemList += Upgrades.initItems()
 
     itemList.forEach { registry.register(it) }
-    blocks.forEach { it.second?.let { registry.register(it) } }
+    blocks.forEach { (_, itemBlock) -> itemBlock?.let { registry.register(it) } }
     items = itemList
 }

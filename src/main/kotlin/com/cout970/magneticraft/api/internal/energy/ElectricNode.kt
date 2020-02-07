@@ -3,8 +3,8 @@ package com.cout970.magneticraft.api.internal.energy
 import com.cout970.magneticraft.api.core.ITileRef
 import com.cout970.magneticraft.api.core.NodeID
 import com.cout970.magneticraft.api.energy.IElectricNode
+import com.cout970.magneticraft.misc.newNbt
 import com.cout970.magneticraft.misc.world.isClient
-import com.cout970.magneticraft.util.newNbt
 import net.minecraft.nbt.NBTTagCompound
 
 
@@ -53,7 +53,7 @@ open class ElectricNode(
             lastTick -> return
             lastTick + 1 -> {
                 lastTick = tick
-                amperage = amperageCount * 0.5
+                amperage = amperageCount //* 0.5
                 amperageCount = 0.0
             }
             else -> {
@@ -72,18 +72,11 @@ open class ElectricNode(
     }
 
     override fun applyPower(power: Double, simulated: Boolean): Double {
-        return if (power > 0) {
-            val squared = voltage * voltage + Math.abs(power) * getCapacity()
-            val diff = Math.sqrt(squared) - Math.abs(voltage)
-            if (!simulated) applyCurrent(diff)
-            power
-        } else {
-            val squared = voltage * voltage - Math.abs(power) * getCapacity()
-            val powerUsed = if (squared > 0) -power else (voltage * voltage) / getCapacity()
-            val diff = Math.sqrt(Math.max(squared, 0.0)) - Math.abs(voltage)
-            if (!simulated) applyCurrent(diff)
-            powerUsed
-        }
+        val energy = Math.abs(voltage * voltage * getCapacity() + power)
+        val finalVoltage = Math.sqrt(Math.max(0.0, energy / getCapacity()))
+        val current = getCapacity() * (finalVoltage - voltage)
+        if (!simulated) applyCurrent(current)
+        return Math.abs(power)
     }
 
     override fun deserializeNBT(nbt: NBTTagCompound?) {

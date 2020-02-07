@@ -1,20 +1,12 @@
+# Bugs
+
 ### TODO list
 - expand container
-- fix guide
 - add conveyor belt up/down blocks
-- add insert animation
-- add steam engine animation
-- add sieve animation, particles and sound
-- add grinder particles and sound
 - add flare stack
-- fix pipes and add auto-import
-- add gears for steam engine tiers (and add a fucking GUI)
-- change tank model and add auto-export
-- update thermopile
-- add conveyor belt end that drops stuff in chests
-- add wire coil durability and remove auto-connect (make lag)
+- add gears for machines
+- add wire coil durability
 - change pumpjack mining mechanic for : amount of oil near = speed of extraction
-- mid-game combustion engine
 - fix recipe progression
 
 ### Ideas to add at some point
@@ -29,18 +21,14 @@
 - Farms
 - Original Tanks
 - Auto-extract pipes
-- Steam tubine
 - Rockets/Rocket silo
 - Better ore processing (galvanization tank, Allow furnace)
 - Geothermal power
 - Quarry?
-- Chainsaw, Drill, pneumatic wrench
 - Particles, lots of particles
 - Textil factory
 - Emerald nuggets for tradding?
 - Pump?
-- Shelving unit ordering...
-
 
 ### Steps to add a new multiblock
 - Add Controller Block

@@ -1,11 +1,11 @@
 package com.cout970.magneticraft
 
-import com.cout970.magneticraft.config.ConfigHandler
-import com.cout970.magneticraft.integration.IntegrationHandler
 import com.cout970.magneticraft.misc.CreativeTabMg
+import com.cout970.magneticraft.misc.info
+import com.cout970.magneticraft.misc.logTime
 import com.cout970.magneticraft.proxy.CommonProxy
-import com.cout970.magneticraft.util.info
-import com.cout970.magneticraft.util.logTime
+import com.cout970.magneticraft.systems.config.ConfigHandler
+import com.cout970.magneticraft.systems.integration.IntegrationHandler
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.SidedProxy
 import net.minecraftforge.fml.common.discovery.ASMDataTable
@@ -19,15 +19,16 @@ import java.io.File
 
 @Suppress("UNUSED_PARAMETER", "unused")
 //Basic mod information for Forge
-@Mod(
-        modid = MOD_ID,
-        name = MOD_NAME,
-        version = "2.4.0",
-        modLanguage = "kotlin",
-        modLanguageAdapter = LANG_ADAPTER,
-        acceptedMinecraftVersions = "[1.12]",
-        dependencies = "required-after:modelloader@[1.0.5,);required-after:forgelin",
-        updateJSON = "https://raw.githubusercontent.com/Magneticraft-Team/Magneticraft/1.12/src/main/resources/update.json"
+@net.minecraftforge.fml.common.Mod(
+    modid = MOD_ID,
+    name = MOD_NAME,
+    version = "2.7.0",
+    modLanguage = "kotlin",
+    guiFactory = "com.cout970.magneticraft.systems.gui.ModGuiFactory",
+    modLanguageAdapter = LANG_ADAPTER,
+    acceptedMinecraftVersions = "[1.12]",
+    dependencies = "required-client:modelloader@[1.1.6,);required-after:forgelin",
+    updateJSON = "https://raw.githubusercontent.com/Magneticraft-Team/Magneticraft/1.12/src/main/resources/update.json"
 )
 //Singleton, see KotlinAdapter to know how it's loaded by forge
 object Magneticraft {
@@ -52,8 +53,8 @@ object Magneticraft {
      * See ClientProxy and ServerProxy
      */
     @SidedProxy(
-            clientSide = "com.cout970.magneticraft.proxy.ClientProxy",
-            serverSide = "com.cout970.magneticraft.proxy.ServerProxy"
+        clientSide = "com.cout970.magneticraft.proxy.ClientProxy",
+        serverSide = "com.cout970.magneticraft.proxy.ServerProxy"
     )
     lateinit var proxy: CommonProxy
 
@@ -76,11 +77,7 @@ object Magneticraft {
 
             info("Loading config...")
             logTime("Config loaded in") {
-                ConfigHandler.apply {
-                    load()
-                    read()
-                    save()
-                }
+                ConfigHandler.init()
             }
 
             //Initialization of the Mod stuff
@@ -124,7 +121,7 @@ object Magneticraft {
             proxy.postInit()
         }
 
-        if(Debug.DEBUG){
+        if (Debug.DEBUG) {
             Debug.printBlockWithoutRecipe()
         }
     }
